@@ -54,7 +54,7 @@ architecture behavioral of Memoria_Instrucciones is
   32 => "000111000000000000000100", --Lectura segunda operacion
   33 => "000111010000000000000101", --Primera operacion + segunda operacion
   34 => "000111100000000000000100", --Lectura segunda operacion 
-  35 => "0001111100000000000000110", --Lectura 3da operacion
+  35 => "000111110000000000000110", --Lectura 3da operacion
   36 => "001000000000000000010111", --Operacion final 
   37 => "001000010000000000000110",--Lectura final
   
