@@ -1,0 +1,30 @@
+
+library ieee; 
+use ieee.std_logic_1164.all; 
+use ieee.std_logic_unsigned.all; 
+use ieee.numeric_std.all; ----------------------------------------------------------------------------------------------- 
+entity Banco_Registros is 
+    Port ( 
+        WriteEnable : in STD_LOGIC;       -- Habilitar escritura 
+        Address : in STD_LOGIC_VECTOR(2 downto 0);  -- Dirección de la memoria 
+        DataIn : in STD_LOGIC_VECTOR(9 downto 0);  -- Datos de entrada 
+        DataOut : out STD_LOGIC_VECTOR(9 downto 0)  -- Datos de salida 
+    ); 
+end entity Banco_Registros; 
+ 
+architecture Behavioral of Banco_Registros is 
+    type RAM_Array is array (0 to 7) of STD_LOGIC_VECTOR(9 downto 0); 
+    signal Memory : RAM_Array; 
+ 
+begin 
+    process (Address) 
+    begin 
+   if WriteEnable = '1' then 
+     -- Escritura en la RAM 
+     Memory(to_integer(unsigned(Address))) <= DataIn; 
+   else 
+     -- Lectura desde la RAM 
+     DataOut <= Memory(to_integer(unsigned(Address))); 
+   end if; 
+    end process; 
+end architecture Behavioral; 
