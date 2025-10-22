@@ -1,180 +1,92 @@
-library ieee; 
-use ieee.std_logic_1164.all; 
------------------------------------------------------------------------------------------------------ 
-entity Alu is 
- port( 
-  input_a : in std_logic_vector(9 downto 0); 
-  input_b : in std_logic_vector(9 downto 0); 
-  sel_alu  : in std_logic_vector(3 downto 0); 
-  flag_zero_main : out std_logic; 
-  flag_signo_main : out std_logic; 
-  flag_acarreo_main : out std_logic; 
-  flag_overflow_main : out std_logic; 
-  output        : out std_logic_vector(9 downto 0) 
- ); 
-end entity; -------------------------------------------------------------------------------------------------------- 
-architecture behavioral of Alu is 
- 
- --Señales 
-  --Señales de datos para los componentes 
- signal input_a_aux : std_logic_vector(9 downto 0); 
- signal input_b_aux : std_logic_vector(9 downto 0); 
- signal output_suma : std_logic_vector(9 downto 0); 
- signal output_resta : std_logic_vector(9 downto 0); 
- signal output_multi : std_logic_vector(10 downto 0); 
- signal output_divi : std_logic_vector(4 downto 0); 
-  
- signal flag_zero : std_logic_vector(3 downto 0); 
- signal flag_signo : std_logic_vector(3 downto 0); 
- signal flag_acarreo : std_logic_vector(3 downto 0); 
- signal flag_overflow : std_logic_vector(3 downto 0); 
- ------------------------------------------------------- 
-  
- --Componentes 
-  --Sumador 
- component Full_adder_Vector_de_bits  
-  port( 
-   A, B : in std_logic_vector(9 downto 0); 
-   Carry : out std_logic; 
-   Res : out std_logic_vector(9 downto 0); 
-   flag_zero : out std_logic; 
-   flag_signo : out std_logic; 
-   flag_acarreo : out std_logic;  
-   flag_overflow : out std_logic 
-  ); 
- end component; 
-  
-  --Restador 
- component Restador10_bits 
-  port( 
-   A,B: in std_logic_vector(9 downto 0);  
-   S:out std_logic_vector(9 downto 0); 
-   flag_zero: out std_logic; 
-   flag_signo:out std_logic; 
-   flag_acarreo:out std_logic; 
-   flag_overflow:out std_logic 
-  ); 
- end component; 
-  
-  --Multiplicador  
- component Multiplicador 
-  port( 
-    A, B: in std_logic_vector(4 downto 0); 
-    Cout:out std_logic; 
-        ResultadoF: out std_logic_vector(10 downto 0); 
-    flag_zero: out std_logic; 
-    flag_signo:out std_logic; 
-    flag_acarreo:out std_logic; 
-    flag_overflow:out std_logic 
-  ); 
-   end component; 
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all; -- <--- LIBRERIA CLAVE
+
+-----------------------------------------------------------------------------------------------------
+entity Alu is
+ port(
+  input_a : in std_logic_vector(9 downto 0);
+  input_b : in std_logic_vector(9 downto 0);
+  sel_alu  : in std_logic_vector(3 downto 0);
+  flag_zero_main : out std_logic;
+  flag_signo_main : out std_logic;
+  flag_acarreo_main : out std_logic;
+  flag_overflow_main : out std_logic;
+  output        : out std_logic_vector(9 downto 0)
+ );
+end entity;
+--------------------------------------------------------------------------------------------------------
+architecture behavioral of Alu is
+
+    -- Señales para operandos
+    signal op_a_uns : unsigned(9 downto 0);
+    signal op_b_uns : unsigned(9 downto 0);
     
-  --Divisor 
- component Divi 
-  port( 
-   A,B: in std_logic_vector(4 downto 0);  
-   R:out std_logic_vector(4 downto 0); 
-   C:out std_logic_vector(4 downto 0); 
-   flag_zero: out std_logic; 
-   flag_signo:out std_logic; 
-   flag_acarreo:out std_logic; 
-   flag_overflow:out std_logic 
-  ); 
- end component; 
-begin 
-  
- process(sel_alu) 
- begin 
-  if sel_alu = "0000" then --Suma de A con B 
-   input_a_aux <= input_a; 
-   input_b_aux <= input_b; 
-  elsif sel_alu = "0001" then --Resta de A con B 
-   input_a_aux <= input_a; 
-   input_b_aux <= input_b; 
-  elsif sel_alu = "0010" then --Multiplicacion de A con B 
-   input_a_aux <= input_a; 
-   input_b_aux <= input_b; 
-  elsif sel_alu = "0011" then --Division de A con B 
-   input_a_aux <= input_a; 
-   input_b_aux <= input_b; 
-  else 
-   NULL; 
-  end if; 
- end process; 
-  
- --Declaracion de componentes 
- Comp1 : Full_adder_Vector_de_bits 
-  port map( 
-   A => input_a_aux, 
-   B => input_b_aux, 
-   Res => output_suma, 
-   flag_zero => flag_zero(0), 
-   flag_signo => flag_signo(0), 
-   flag_acarreo => flag_acarreo(0), 
-   flag_overflow => flag_overflow(0) 
-  ); 
-   
- Comp2 : Restador10_bits 
-  port map( 
-   A => input_a_aux, 
-   B => input_b_aux, 
-   S => output_resta, 
-   flag_zero => flag_zero(1), 
-   flag_signo => flag_signo(1), 
-   flag_acarreo => flag_acarreo(1), 
-   flag_overflow => flag_overflow(1) 
-  ); 
-   
- Comp3 : Multiplicador 
-  port map( 
-   A => input_a_aux(4 downto 0), 
-   B => input_b_aux(4 downto 0), 
-   ResultadoF => output_multi, 
-   flag_zero => flag_zero(2), 
-   flag_signo => flag_signo(2), 
-   flag_acarreo => flag_acarreo(2), 
-   flag_overflow => flag_overflow(2) 
-  ); 
-   
- Comp4 : Divi 
-  port map( 
-   A => input_a_aux(4 downto 0), 
-   B => input_b_aux(4 downto 0), 
-   C => output_divi, 
-   flag_zero => flag_zero(3), 
-   flag_signo => flag_signo(3), 
-   flag_acarreo => flag_acarreo(3), 
-   flag_overflow => flag_overflow(3) 
-  ); 
-   
- process(output_suma,output_resta,output_multi,output_divi) 
- begin 
-  if sel_alu = "0000" then --Suma 
-   output <= output_suma; 
-   flag_zero_main <= flag_zero(0); 
-   flag_signo_main <= flag_signo(0); 
-   flag_acarreo_main <= flag_acarreo(0); 
-   flag_overflow_main <= flag_overflow(0); 
-  elsif sel_alu = "0001" then --Resta 
-   output <= output_resta; 
-   flag_zero_main <= flag_zero(1); 
-   flag_signo_main <= flag_signo(1); 
-   flag_acarreo_main <= flag_acarreo(1); 
-   flag_overflow_main <= flag_overflow(1); 
-  elsif sel_alu = "0010" then --Multiplicacion 
-   output <= output_multi(9 downto 0); 
-   flag_zero_main <= flag_zero(2); 
-   flag_signo_main <= flag_signo(2); 
-   flag_acarreo_main <= flag_acarreo(2); 
-   flag_overflow_main <= flag_overflow(2); 
-  elsif sel_alu = "0011" then --Divi 
-   output <= "00000" & output_divi; 
-   flag_zero_main <= flag_zero(3); 
-   flag_signo_main <= flag_signo(3); 
-   flag_acarreo_main <= flag_acarreo(3); 
-   flag_overflow_main <= flag_overflow(3); 
-  else 
-   output <= "0000000000"; 
-  end if; 
- end process;
- end architecture;
+    -- Señales para los 5 bits (multiplicación/división)
+    signal op_a_5bit : unsigned(4 downto 0);
+    signal op_b_5bit : unsigned(4 downto 0);
+    
+    -- Señales para resultados
+    signal res_add : unsigned(10 downto 0); -- 10+10 puede dar 11 bits
+    signal res_sub : unsigned(10 downto 0);
+    signal res_mul : unsigned(9 downto 0);  -- 5*5 = 10 bits
+    signal res_div : unsigned(4 downto 0);  -- 5/5 = 5 bits
+    
+begin
+    -- Convertir entradas
+    op_a_uns <= unsigned(input_a);
+    op_b_uns <= unsigned(input_b);
+    op_a_5bit <= unsigned(input_a(4 downto 0)); -- Truncar para Mul/Div
+    op_b_5bit <= unsigned(input_b(4 downto 0)); -- Truncar para Mul/Div
+
+    -- Operaciones (se calculan todas en paralelo)
+    res_add <= ('0' & op_a_uns) + ('0' & op_b_uns);
+    res_sub <= ('0' & op_a_uns) - ('0' & op_b_uns);
+    res_mul <= op_a_5bit * op_b_5bit; -- Multiplicación de 5 bits
+    
+    -- Manejo de división por cero (concurrente)
+    res_div <= (others => '1') when op_b_5bit = 0 else 
+               (op_a_5bit / op_b_5bit);
+
+    -- Proceso para seleccionar la salida y banderas
+    process(sel_alu, res_add, res_sub, res_mul, res_div)
+        variable res_10bit : std_logic_vector(9 downto 0);
+    begin
+        -- Valores por defecto
+        res_10bit := (others => '0');
+        flag_zero_main <= '0';
+        flag_signo_main <= '0';
+        flag_acarreo_main <= '0';
+        flag_overflow_main <= '0';
+    
+        case sel_alu is
+            when "0000" => -- Suma
+                res_10bit := std_logic_vector(res_add(9 downto 0));
+                flag_acarreo_main <= res_add(10); -- Carry
+                flag_overflow_main <= res_add(10); -- Overflow (simplificado)
+            
+            when "0001" => -- Resta
+                res_10bit := std_logic_vector(res_sub(9 downto 0));
+                flag_acarreo_main <= res_sub(10); -- Borrow (activo bajo)
+            
+            when "0010" => -- Multiplicacion
+                res_10bit := std_logic_vector(res_mul);
+            
+            when "0011" => -- Division
+                res_10bit := "00000" & std_logic_vector(res_div);
+            
+            when others =>
+                res_10bit := (others => '0');
+        end case;
+        
+        -- Asignar banderas comunes
+        if(res_10bit = "0000000000") then
+            flag_zero_main <= '1';
+        end if;
+        flag_signo_main <= res_10bit(9);
+        
+        output <= res_10bit;
+        
+    end process;
+
+end architecture;

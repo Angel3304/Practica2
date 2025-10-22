@@ -3,6 +3,8 @@ library ieee;
 use ieee.std_logic_1164.all; -------------------------------------------------------------------------- 
 entity Unidad_Ejecucion is  
 port( 
+clk : in std_logic;
+reset : in std_logic;
 input_ex : in std_logic_vector(23 downto 0); 
 output_ex : out std_logic_vector(9 downto 0); 
 flag_zero : out std_logic; 
@@ -65,13 +67,14 @@ signal input_mux_a_aux : std_logic_vector(3 downto 0);
   
   --Componente Ram 
  component Banco_Registros 
-  port( 
-   WriteEnable : in STD_LOGIC;       -- Habilitar escritura 
-   Address : in STD_LOGIC_VECTOR(2 downto 0);  -- Dirección de la memoria 
-   DataIn : in STD_LOGIC_VECTOR(9 downto 0);  -- Datos de entrada 
-   DataOut : out STD_LOGIC_VECTOR(9 downto 0)  -- Datos de salida 
-  ); 
- end component; 
+        port( 
+            clk : in STD_LOGIC;
+            WriteEnable : in STD_LOGIC;
+            Address : in STD_LOGIC_VECTOR(2 downto 0);
+            DataIn : in STD_LOGIC_VECTOR(9 downto 0);
+            DataOut : out STD_LOGIC_VECTOR(9 downto 0)
+        );
+    end component; 
 begin 
   
  --Proceso de asignacion de entradas y toma de datos de la RAM 
@@ -325,27 +328,41 @@ address_aux <= "011";
 end if; 
 end process; 
 --Componente de guardado de datos  
-Comp5 : Banco_Registros port map(writeEnable_aux,address_aux,datain_aux,dataout_aux); 
-process(input_ex) 
-begin 
-if input_ex(21 downto 16) = "001001" then  
-output_ex <= res1; 
-flag_zero <= flag_zero_aux; 
-flag_signo <= flag_signo_aux; 
-flag_acarreo <= flag_acarreo_aux; 
-flag_overflow <= flag_overflow_aux; 
-elsif input_ex(21 downto 16) = "010101" then  
-output_ex <= res2; 
-flag_zero <= flag_zero_aux; 
-flag_signo <= flag_signo_aux; 
-flag_acarreo <= flag_acarreo_aux; 
-   flag_overflow <= flag_overflow_aux; 
-  elsif input_ex(21 downto 16) = "100001" then  
-   output_ex <= res3; 
-   flag_zero <= flag_zero_aux; 
-   flag_signo <= flag_signo_aux; 
-   flag_acarreo <= flag_acarreo_aux; 
-   flag_overflow <= flag_overflow_aux;  
-  end if; 
- end process;    
+Comp5 : Banco_Registros port map(clk,writeEnable_aux,address_aux,datain_aux,dataout_aux); 
+process(clk, reset) 
+    begin 
+        if reset = '1' then
+            -- Limpia el display y las banderas al instante
+            output_ex <= (others => '0');
+            flag_zero <= '0';
+            flag_signo <= '0';
+            flag_acarreo <= '0';
+            flag_overflow <= '0';
+            
+        elsif rising_edge(clk) then
+            -- Lógica de registro
+            
+            if input_ex(23 downto 18) = "110001" then  -- Opcode "Leer Prog 1"
+                output_ex <= res1; 
+                flag_zero <= flag_zero_aux; 
+                flag_signo <= flag_signo_aux;
+                flag_acarreo <= flag_acarreo_aux; 
+                flag_overflow <= flag_overflow_aux; 
+                
+            elsif input_ex(23 downto 18) = "110010" then  -- Opcode "Leer Prog 2"
+                output_ex <= res2; 
+                flag_zero <= flag_zero_aux;
+                flag_signo <= flag_signo_aux; 
+                flag_acarreo <= flag_acarreo_aux; 
+                flag_overflow <= flag_overflow_aux; 
+                
+            elsif input_ex(23 downto 18) = "110011" then  -- Opcode "Leer Prog 3"
+                output_ex <= res3;
+                flag_zero <= flag_zero_aux; 
+                flag_signo <= flag_signo_aux; 
+                flag_acarreo <= flag_acarreo_aux; 
+                flag_overflow <= flag_overflow_aux;  
+            end if; 
+        end if;
+    end process;
 end architecture; 
