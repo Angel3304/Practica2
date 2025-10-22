@@ -35,6 +35,7 @@ architecture behavioral of Procesador_Top is
 
  -- Señales de conexión
  signal rom_data_out : std_logic_vector(23 downto 0);
+ signal bcd_in_signal : std_logic_vector(11 downto 0);
  signal bcd_out : std_logic_vector(15 downto 0);
  
  -- (Señales del Display omitidas por brevedad... son las mismas del Paso 3)
@@ -197,8 +198,9 @@ begin
  end process;
  
  -- 3. Lógica de Visualización (Display) --
+ bcd_in_signal <= "00" & ACC_resultado;
  Comp_BCD : Converti port map(
-  S => "00" & ACC_resultado, -- Asumimos que ACC es 10 bits
+  S => bcd_in_signal, -- Asumimos que ACC es 10 bits
   output_bcd => bcd_out
  );
  

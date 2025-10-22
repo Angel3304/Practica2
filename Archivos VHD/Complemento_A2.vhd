@@ -27,11 +27,14 @@ architecture Behavioral of Complemento2 is
  --Signals 
  signal carry_c2_aux : std_logic; 
  signal output_c2_a_aux : std_logic_vector(9 downto 0); 
+ signal input_a_not_aux : std_logic_vector(9 downto 0);
 begin 
+
+ input_a_not_aux <= not input_c2_a;
  
  Comp2 : Full_adder_Vector_de_bits 
   port map( 
-   A => not input_c2_a, 
+   A => input_a_not_aux, 
    B => "0000000001", 
    Carry => carry_c2_aux, 
    Res => output_c2_a_aux 

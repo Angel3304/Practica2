@@ -104,7 +104,7 @@ begin
   elsif input_ex(23 downto 18) = "001001" then 
    res1 <= dataout_aux; 
   ----------------------------------------------- 
-  elsif input_ex(23 downto 18) = "0001010" then 
+  elsif input_ex(23 downto 18) = "001010" then 
    input_mux_a_aux <= "1000"; 
    input_mux_b_aux <= "1000"; 
    sel_alu_aux <= "0010"; 
