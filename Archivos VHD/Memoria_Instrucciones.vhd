@@ -15,6 +15,7 @@ architecture behavioral of Memoria_Instrucciones is
  
  type Rom_instrucciones is array(0 to 40) of std_logic_vector(23 downto 0); 
  constant TR : Rom_instrucciones := ( 
+  -- Programa 1 (inicia en 0)
   0 => "000000000000100000100011", --13X
   1 => "000000010001100100100101", --23Y 
   2 => "000000100111001000110111", --w/4 
@@ -26,9 +27,11 @@ architecture behavioral of Memoria_Instrucciones is
   8 => "000010000000000000010011", --Operacion compuesta final  
   9 => "000010010000000000000010", --Lectura del resultado 
   --------------------------------------------------------------- 
-  10 => "001000010000000000000000", -- Opcode WAIT_5S
-  11 => "000011110000000000000000", -- Opcode HALT
+  -- CAMBIOS AQUÍ: Opcodes corregidos
+  10 => "100001000000000000000000", -- Opcode WAIT_5S (Inicia con 100001)
+  11 => "001111000000000000000000", -- Opcode HALT (Inicia con 001111)
   
+  -- Programa 2 (inicia en 12)
   12 => "000010101000100000100011", --x * x 
   13 => "000010110000000000000010", --Lectura operacion simple 1 
   14 => "000011000000000000100011", --13x2 
@@ -42,9 +45,11 @@ architecture behavioral of Memoria_Instrucciones is
   22 => "000101000000000000010011", --Operacion final 
   23 => "000101010000000000000010", --Lectura operacion final 
   ---------------------------------------------------------------- 
-  24 => "001000010000000000000000", -- Opcode WAIT_5S
-  25 => "000011110000000000000000", -- Opcode HALT
+  -- CAMBIOS AQUÍ: Opcodes corregidos
+  24 => "100001000000000000000000", -- Opcode WAIT_5S
+  25 => "001111000000000000000000", -- Opcode HALT
   
+  -- Programa 3 (inicia en 26)
   26 => "000101101000100000100011", --X al cuadrado
   27 => "000101110000000000000010", --Lectura operacion anterior Ram
   28 => "000110000110100000100011", --7 por X al cuadrado
@@ -56,11 +61,15 @@ architecture behavioral of Memoria_Instrucciones is
   34 => "000111100000000000000100", --Lectura segunda operacion 
   35 => "000111110000000000000110", --Lectura 3da operacion
   36 => "001000000000000000010111", --Operacion final 
-  37 => "001000010000000000000110",--Lectura final
+  37 => "001000010000000000000110", --Lectura final
   
-  38 => "001000010000000000000000", -- Opcode WAIT_5S
-  39 => "000011110000000000000000", -- Opcode HALT
-  others => "000011110000000000000000"); 
+  -- CAMBIOS AQUÍ: Opcodes corregidos
+  38 => "100001000000000000000000", -- Opcode WAIT_5S
+  39 => "001111000000000000000000", -- Opcode HALT
+  
+  -- CAMBIO AQUÍ: Opcode 'others' corregido
+  others => "001111000000000000000000"
+ );
 begin
 	output <= TR(to_integer(unsigned(input))); 
 end architecture; 
